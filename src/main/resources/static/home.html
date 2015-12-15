@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>后台管理系统</title>
+<link rel="stylesheet" type="text/css" href="/themes/default/easyui.css" id="swicth-style">
+<link rel="stylesheet" type="text/css" href="/css/icon.css">
+<link rel="stylesheet" type="text/css" href="/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="/css/home.css">
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+<script type="text/javascript" src="/js/home.js"></script>
+</head>
+
+<body class="easyui-layout">
+<div region="north" border="true" class="cs-north">
+	<div class="cs-north-bg">
+		<div class="cs-north-logo">选牛网后台管理系统</div>
+		<ul class="ui-user-nav">
+			<li class="li-nav-item">当前用户：admin</li>
+			<li class="li-nav-item">|</li>
+			<li class="li-nav-item"><a href="/logout">退出</a></li>
+		</ul>
+		<ul class="ui-skin-nav">
+            <li class="li-skinitem" title="default"><span class="default" rel="default"></span></li>
+            <li class="li-skinitem" title="gray"><span class="gray" rel="gray"></span></li>
+			<li class="li-skinitem" title="bootstrap"><span class="bootstrap" rel="bootstrap"></span></li>
+			<li class="li-skinitem" title="metro"><span class="metro" rel="metro"></span></li>
+		</ul>
+	</div>
+</div>
+<div region="west" border="true" split="true" title="导航菜单" data-options="iconCls:'icon-application_side_tree'" class="cs-west">
+	<div id="menu" class="easyui-accordion" fit="true" border="false"></div>
+</div>
+<div id="mainPanle" region="center" border="true" border="false">
+	<div id="tabs" class="easyui-tabs"  fit="true" border="false" >
+		<div title="Home" iconCls="icon-application_home">
+			<div class="">
+			</div>
+		</div>
+	</div>
+</div>
+<div region="south" border="false" class="cs-south">Copyright © 2015</div>
+<div id="mm" class="easyui-menu cs-tab-menu">
+	<div id="mm-tabupdate">刷新</div>
+	<div class="menu-sep"></div>
+	<div id="mm-tabclose">关闭</div>
+	<div id="mm-tabcloseother">关闭其他</div>
+	<div id="mm-tabcloseall">关闭全部</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+spring:
+  velocity:
+    properties:
+      input:
+        encoding: UTF-8
+      output:
+        encoding: UTF-8
+    cache: false
+
+logging:
+  file: bms.log
+
+mysql:
+  enable: true
+  url: "jdbc:mysql://127.0.0.1:3306/back_universal?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true&useAffectedRows=true"
+  driverClassName: "com.mysql.jdbc.Driver"
+  username: "root"
+  password: "mrule"
+  initialSize: 5
+  maxIdle: 10
+  maxActive: 50
+  validationQuery: "select 1"
+
+
+redis:
+  enable: true
+  host: 172.32.21.6
+  port: 6379
