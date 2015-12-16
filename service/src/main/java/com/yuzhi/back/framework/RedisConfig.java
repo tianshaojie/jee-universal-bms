@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.net.UnknownHostException;
@@ -24,152 +25,164 @@ import java.util.List;
 @ConfigurationProperties(prefix="redis")
 @ConditionalOnExpression("${redis.enable:false}")
 public class RedisConfig {
-	private int database = 0;
-	private String host;
-	private String password;
-	private int port;
-	
-	private int maxIdle = 8;
-	private int minIdle = 0;
-	private int maxActive = 8;
-	private int maxWait = -1;
-	
-	private String sentinelMaster;
-	private String sentinelNodes;
-	
-	@Bean
-	public JedisConnectionFactory redisConnectionFactory() throws UnknownHostException {
-		RedisSentinelConfiguration sentinelConfig = null;
-		if (this.getSentinelMaster() != null) {
-			sentinelConfig = new RedisSentinelConfiguration();
-			sentinelConfig.master(this.getSentinelMaster());
-			sentinelConfig.setSentinels(createSentinels(this.getSentinelNodes()));
-		}
-		
-		JedisPoolConfig config = new JedisPoolConfig();
-		config.setMaxTotal(this.getMaxActive());
-		config.setMaxIdle(this.getMaxIdle());
-		config.setMinIdle(this.getMinIdle());
-		config.setMaxWaitMillis(this.getMaxWait());
-		
-		JedisConnectionFactory factory = new JedisConnectionFactory(sentinelConfig, config);
-		factory.setHostName(this.getHost());
-		factory.setPort(this.getPort());
-		if (this.getPassword() != null) {
-			factory.setPassword(this.getPassword());
-		}
-		factory.setDatabase(this.getDatabase());
-		return factory;
-	}
+    
+    private int database = 0;
+    private String host;
+    private String password;
+    private int port;
 
-	@Bean
-	public RedisOperations<Object, Object> redisTemplate() throws UnknownHostException {
-		RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
-		template.setConnectionFactory(redisConnectionFactory());
-		return template;
-	}
+    private int maxIdle = 8;
+    private int minIdle = 0;
+    private int maxActive = 8;
+    private int maxWait = -1;
 
-	@Bean
-	public StringRedisTemplate stringRedisTemplate() throws UnknownHostException {
-		StringRedisTemplate template = new StringRedisTemplate();
-		template.setConnectionFactory(redisConnectionFactory());
-		return template;
-	}
-	
-	private List<RedisNode> createSentinels(String sentinelNodes) {
-		List<RedisNode> sentinels = new ArrayList<RedisNode>();
-		for (String node : StringUtils.commaDelimitedListToStringArray(sentinelNodes)) {
-			try {
-				String[] parts = StringUtils.split(node, ":");
-				Assert.state(parts.length == 2, "Must be defined as 'host:port'");
-				sentinels.add(new RedisNode(parts[0], Integer.valueOf(parts[1])));
-			}
-			catch (RuntimeException ex) {
-				throw new IllegalStateException("Invalid redis sentinel "
-						+ "property '" + node + "'", ex);
-			}
-		}
-		return sentinels;
-	}
+    private String sentinelMaster;
+    private String sentinelNodes;
 
-	public int getDatabase() {
-		return database;
-	}
+    @Bean
+    public JedisConnectionFactory redisConnectionFactory() throws UnknownHostException {
+        RedisSentinelConfiguration sentinelConfig = null;
+        if (this.getSentinelMaster() != null) {
+            sentinelConfig = new RedisSentinelConfiguration();
+            sentinelConfig.master(this.getSentinelMaster());
+            sentinelConfig.setSentinels(createSentinels(this.getSentinelNodes()));
+        }
 
-	public void setDatabase(int database) {
-		this.database = database;
-	}
+        JedisPoolConfig config = new JedisPoolConfig();
+        config.setMaxTotal(this.getMaxActive());
+        config.setMaxIdle(this.getMaxIdle());
+        config.setMinIdle(this.getMinIdle());
+        config.setMaxWaitMillis(this.getMaxWait());
 
-	public String getHost() {
-		return host;
-	}
+        JedisConnectionFactory factory = new JedisConnectionFactory(config);
+        factory.setHostName(this.getHost());
+        factory.setPort(this.getPort());
+        if (this.getPassword() != null) {
+            factory.setPassword(this.getPassword());
+        }
+        factory.setDatabase(this.getDatabase());
+        return factory;
+    }
 
-	public void setHost(String host) {
-		this.host = host;
-	}
+    @Bean
+    public JedisPool jedisPool() {
+        try {
+            JedisPool pool = new JedisPool(redisConnectionFactory().getPoolConfig(), host, port);
+            return pool;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    @Bean
+    public RedisOperations<Object, Object> redisTemplate() throws UnknownHostException {
+        RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
+        template.setConnectionFactory(redisConnectionFactory());
+        return template;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    @Bean
+    public StringRedisTemplate stringRedisTemplate() throws UnknownHostException {
+        StringRedisTemplate template = new StringRedisTemplate();
+        template.setConnectionFactory(redisConnectionFactory());
+        return template;
+    }
 
-	public int getPort() {
-		return port;
-	}
+    private List<RedisNode> createSentinels(String sentinelNodes) {
+        List<RedisNode> sentinels = new ArrayList<RedisNode>();
+        for (String node : StringUtils.commaDelimitedListToStringArray(sentinelNodes)) {
+            try {
+                String[] parts = StringUtils.split(node, ":");
+                Assert.state(parts.length == 2, "Must be defined as 'host:port'");
+                sentinels.add(new RedisNode(parts[0], Integer.valueOf(parts[1])));
+            }
+            catch (RuntimeException ex) {
+                throw new IllegalStateException("Invalid redis sentinel "
+                        + "property '" + node + "'", ex);
+            }
+        }
+        return sentinels;
+    }
 
-	public void setPort(int port) {
-		this.port = port;
-	}
+    public int getDatabase() {
+        return database;
+    }
 
-	public int getMaxIdle() {
-		return maxIdle;
-	}
+    public void setDatabase(int database) {
+        this.database = database;
+    }
 
-	public void setMaxIdle(int maxIdle) {
-		this.maxIdle = maxIdle;
-	}
+    public String getHost() {
+        return host;
+    }
 
-	public int getMinIdle() {
-		return minIdle;
-	}
+    public void setHost(String host) {
+        this.host = host;
+    }
 
-	public void setMinIdle(int minIdle) {
-		this.minIdle = minIdle;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public int getMaxActive() {
-		return maxActive;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public void setMaxActive(int maxActive) {
-		this.maxActive = maxActive;
-	}
+    public int getPort() {
+        return port;
+    }
 
-	public int getMaxWait() {
-		return maxWait;
-	}
+    public void setPort(int port) {
+        this.port = port;
+    }
 
-	public void setMaxWait(int maxWait) {
-		this.maxWait = maxWait;
-	}
+    public int getMaxIdle() {
+        return maxIdle;
+    }
 
-	public String getSentinelMaster() {
-		return sentinelMaster;
-	}
+    public void setMaxIdle(int maxIdle) {
+        this.maxIdle = maxIdle;
+    }
 
-	public void setSentinelMaster(String sentinelMaster) {
-		this.sentinelMaster = sentinelMaster;
-	}
+    public int getMinIdle() {
+        return minIdle;
+    }
 
-	public String getSentinelNodes() {
-		return sentinelNodes;
-	}
+    public void setMinIdle(int minIdle) {
+        this.minIdle = minIdle;
+    }
 
-	public void setSentinelNodes(String sentinelNodes) {
-		this.sentinelNodes = sentinelNodes;
-	}
+    public int getMaxActive() {
+        return maxActive;
+    }
+
+    public void setMaxActive(int maxActive) {
+        this.maxActive = maxActive;
+    }
+
+    public int getMaxWait() {
+        return maxWait;
+    }
+
+    public void setMaxWait(int maxWait) {
+        this.maxWait = maxWait;
+    }
+
+    public String getSentinelMaster() {
+        return sentinelMaster;
+    }
+
+    public void setSentinelMaster(String sentinelMaster) {
+        this.sentinelMaster = sentinelMaster;
+    }
+
+    public String getSentinelNodes() {
+        return sentinelNodes;
+    }
+
+    public void setSentinelNodes(String sentinelNodes) {
+        this.sentinelNodes = sentinelNodes;
+    }
 	
 }

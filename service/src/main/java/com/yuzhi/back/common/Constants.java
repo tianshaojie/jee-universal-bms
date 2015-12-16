@@ -5,6 +5,11 @@ package com.yuzhi.back.common;
  */
 public class Constants {
 
+    // shiro redis cache prefix
+    public static String SHIRO_REDIS_SESSION = "shiro_redis_session:";
+    public static String SHIRO_REDIS_CACHE = "shiro_redis_cache:";
+    public static String SESSSION_USER = "SESSION_USER";
+
     public static final int USER_STATUS_ENABLE = 1;
     public static final int USER_STATUS_DISABLE = 2;
 
