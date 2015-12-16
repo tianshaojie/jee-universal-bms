@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Demo</title>
+<link rel="stylesheet" type="text/css" href="../themes/default/easyui.css" id="swicth-style">
+<link rel="stylesheet" type="text/css" href="../css/icon.css">
+<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+<link rel="stylesheet" type="text/css" href="home-static.css">
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../js/jquery.cookie.js"></script>
+<script type="text/javascript" src="../js/common.js"></script>
+<script type="text/javascript" src="../js/home.js"></script>
+<script type="text/javascript">
+	$(function() {
+
+        // 左侧菜单点击事件
+        $('.easyui-accordion li a').click(function(){
+            $('.easyui-accordion li div').removeClass("selected");
+            var self = $(this);
+            self.parent().addClass("selected");
+            addTab(self.text(), self.attr('src'), '');
+        }).hover(function(){
+            $(this).parent().addClass("hover");
+        },function(){
+            $(this).parent().removeClass("hover");
+        }).first().click();
+
+        // 初始化左侧树菜单
+		var tree = [{"id":1,"pid":0,"text":"系统设置","iconCls":"icon-1012333","attributes"
+				:{"url":"http://www.baidu.com"},"children":[{"id":2,"pid":1,"text":"权限设置","iconCls":"icon-wrench",
+			"attributes":{"url":"http://www.baidu.com"},"children":[{"id":4,"pid":2,"text":"用户管理","iconCls":"icon-user",
+				"attributes":{"url":"http://www.baidu.com"},"children":[],"sort":4},{"id":5,"pid":2,"text":"角色管理","iconCls":"icon-vcard","attributes"
+				:{"url":"http://www.baidu.com"},"children":[],"sort":5},{"id":6,"pid":2,"text":"菜单管理","iconCls"
+				:"icon-application_cascade","attributes":{"url":"http://www.baidu.com"},"children":[],"sort"
+				:6}],"sort":2},{"id":3,"pid":1,"text":"基础设置","iconCls":"icon-wrench","attributes":{"url":"http://www.baidu.com"},"children"
+				:[{"id":7,"pid":3,"text":"数据字典","iconCls":"icon-application_view_detail","attributes":{"url":"http://www.baidu.com"},"children":[],"sort":7},{"id":8,"pid":3,"text":"日志管理","iconCls":"icon-application_view_detail"
+			,"attributes":{"url":"http://www.baidu.com"},"children":[],"sort":8}],"sort":3}],"sort":1},{"id":9,"pid"
+			:0,"text":"财务管理","iconCls":null,"attributes":{"url":"http://www.baidu.com"},"children":[{"id":10,"pid":9,"text":"充值管理","iconCls"
+			:null,"attributes":{"url":"http://www.baidu.com"},"children":[{"id":12,"pid":10,"text":"到账确认","iconCls":null,"attributes"
+			:{"url":"http://www.baidu.com"},"children":[],"sort":12},{"id":13,"pid":10,"text":"到账审核","iconCls":null,"attributes":{"url"
+			:"http://www.baidu.com"},"children":[],"sort":13}],"sort":10},{"id":11,"pid":9,"text":"提现管理","iconCls":null,"attributes"
+			:{"url":"http://www.baidu.com"},"children":[{"id":14,"pid":11,"text":"提现确认","iconCls":null,"attributes":{"url":"http://www.baidu.com"},"children"
+			:[],"sort":14},{"id":15,"pid":11,"text":"提现审核","iconCls":null,"attributes":{"url":"http://www.baidu.com"},"children":[]
+		,"sort":15}],"sort":11}],"sort":9}];
+
+		$.each(tree, function(i, node) {
+			$('#menu').accordion('add', {
+				title: node.text,
+				iconCls: node.iconCls,
+				content: $('<ul class="easyui-tree"/>').data('node', node.children)
+			});
+		});
+		$('.easyui-tree').each(function(i, elem) {
+			$(elem).tree('loadData', $(elem).data('node'));
+			$(elem).tree({animate:true});
+			$(elem).tree({onClick: function(node){
+				if($(elem).tree('isLeaf',node.target)){
+					addTab(node.text, node.attributes.url, node.iconCls);
+				}
+			}
+			});
+		});
+		$('#menu').accordion('select', 0);
+	});
+</script>
+</head>
+
+<body class="easyui-layout">
+<div region="north" border="true" class="cs-north">
+	<div class="cs-north-bg">
+		<div class="cs-north-logo">选牛网后台管理系统</div>
+		<ul class="ui-user-nav">
+			<li class="li-nav-item">当前用户：admin</li>
+			<li class="li-nav-item">|</li>
+			<li class="li-nav-item"><a href="../login.html">退出</a></li>
+		</ul>
+		<ul class="ui-skin-nav">
+            <li class="li-skinitem" title="default"><span class="default" rel="default"></span></li>
+            <li class="li-skinitem" title="gray"><span class="gray" rel="gray"></span></li>
+			<li class="li-skinitem" title="bootstrap"><span class="bootstrap" rel="bootstrap"></span></li>
+			<li class="li-skinitem" title="metro"><span class="metro" rel="metro"></span></li>
+		</ul>
+		<!--
+		<ul class="tabs" style="height: 26px;position: absolute;bottom: 1px;margin-left: 0px;">
+			<li class="tabs-first tabs-selected" style="margin: 0 0 -1px 0;">
+				<a class="tabs-inner" href="javascript:void(0)" style="height: 25px; line-height: 25px;">
+					<span class="tabs-title">系统管理</span><span class="tabs-icon"></span>
+				</a>
+			</li>
+			<li style="margin: 0 0 -1px 0;">
+				<a class="tabs-inner" href="javascript:void(0)" style="height: 25px; line-height: 25px;">
+					<span class="tabs-title">公告管理</span><span class="tabs-icon"></span>
+				</a>
+			</li>
+			<li class="tabs-last" style="margin: 0 0 -1px 0;">
+				<a class="tabs-inner" href="javascript:void(0)" style="height: 25px; line-height: 25px;"><span
+						class="tabs-title tabs-closable tabs-with-icon">财务管理</span><span class="tabs-icon icon-help"></span>
+				</a><a class="tabs-close" href="javascript:void(0)"></a>
+			</li>
+		</ul>
+		-->
+	</div>
+</div>
+<div region="west" border="true" split="true" title="导航菜单" data-options="iconCls:'icon-application_side_tree'" class="cs-west">
+    <div id="menu" class="easyui-accordion" fit="true" border="false">
+        <div title="系统权限管理" iconCls="icon-1012333">
+            <ul>
+                <li><div><a href="javascript:void(0);" src="user.html">用户管理</a></div></li>
+                <li><div><a href="javascript:void(0);" src="http://www.baidu.com">角色管理</a></div></li>
+                <li><div><a href="javascript:void(0);" src="http://www.baidu.com">功能管理</a></div></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="mainPanle" region="center" border="true" border="false">
+	<div id="tabs" class="easyui-tabs"  fit="true" border="false" >
+		<div title="Home" iconCls="icon-application_home">
+			<div class="cs-home-remark">
+				<h1>选牛网后台管理系统</h1>
+			</div>
+		</div>
+	</div>
+</div>
+<div region="south" border="false" class="cs-south">Copyright © 2015</div>
+<div id="mm" class="easyui-menu cs-tab-menu">
+	<div id="mm-tabupdate">刷新</div>
+	<div class="menu-sep"></div>
+	<div id="mm-tabclose">关闭</div>
+	<div id="mm-tabcloseother">关闭其他</div>
+	<div id="mm-tabcloseall">关闭全部</div>
+</div>
+</body>
+</html>

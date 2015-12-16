@@ -1,0 +1,33 @@
+<configuration>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/yuzhi/log/admin.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>/yuzhi/log/admin.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %X{GlobalTrackId} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %X{GlobalTrackId} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <logger name="com.ibatis" level="DEBUG" />
+    <logger name="com.ibatis.common.jdbc.SimpleDataSource" level="DEBUG" />
+    <logger name="com.ibatis.common.jdbc.ScriptRunner" level="DEBUG" />
+    <logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate" level="DEBUG" />
+    <logger name="java.sql.Connection" level="DEBUG" />
+    <logger name="java.sql.Statement" level="DEBUG" />
+    <logger name="java.sql.PreparedStatement" level="DEBUG" />
+</configuration>

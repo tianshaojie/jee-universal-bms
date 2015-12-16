@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yuzhi.back.dao.mapper.NoticeMapper" >
+  <resultMap id="BaseResultMap" type="com.yuzhi.back.dao.entity.Notice" >
+    <id column="notice_id" property="noticeId" jdbcType="BIGINT" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="source" property="source" jdbcType="VARCHAR" />
+    <result column="is_use_link" property="isUseLink" jdbcType="TINYINT" />
+    <result column="link" property="link" jdbcType="VARCHAR" />
+    <result column="publish_time" property="publishTime" jdbcType="TIMESTAMP" />
+    <result column="publish_status" property="publishStatus" jdbcType="TINYINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="category" property="category" jdbcType="TINYINT" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.yuzhi.back.dao.entity.Notice" extends="BaseResultMap" >
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    notice_id, title, source, is_use_link, link, publish_time, publish_status, create_time, 
+    category
+  </sql>
+  <sql id="Blob_Column_List" >
+    content
+  </sql>
+  <insert id="insertSelective" parameterType="com.yuzhi.back.dao.entity.Notice" >
+    insert into notice
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="noticeId != null" >
+        notice_id,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="source != null" >
+        source,
+      </if>
+      <if test="isUseLink != null" >
+        is_use_link,
+      </if>
+      <if test="link != null" >
+        link,
+      </if>
+      <if test="publishTime != null" >
+        publish_time,
+      </if>
+      <if test="publishStatus != null" >
+        publish_status,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="category != null" >
+        category,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="noticeId != null" >
+        #{noticeId,jdbcType=BIGINT},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="isUseLink != null" >
+        #{isUseLink,jdbcType=TINYINT},
+      </if>
+      <if test="link != null" >
+        #{link,jdbcType=VARCHAR},
+      </if>
+      <if test="publishTime != null" >
+        #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="publishStatus != null" >
+        #{publishStatus,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="category != null" >
+        #{category,jdbcType=TINYINT},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yuzhi.back.dao.entity.Notice" >
+    update notice
+    <set >
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="source != null" >
+        source = #{source,jdbcType=VARCHAR},
+      </if>
+      <if test="isUseLink != null" >
+        is_use_link = #{isUseLink,jdbcType=TINYINT},
+      </if>
+      <if test="link != null" >
+        link = #{link,jdbcType=VARCHAR},
+      </if>
+      <if test="publishTime != null" >
+        publish_time = #{publishTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="publishStatus != null" >
+        publish_status = #{publishStatus,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="category != null" >
+        category = #{category,jdbcType=TINYINT},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where notice_id = #{noticeId,jdbcType=BIGINT}
+  </update>
+
+  <!-- 以下为自定义 -->
+  <select id="getNoticeList" parameterType="map" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from notice
+    <where>
+      1=1
+      <if test="title != null and title != '' " >
+        and title like concat('%',#{title},'%')
+      </if>
+      <if test="category != null and category > 0" >
+        and category = #{category,jdbcType=TINYINT}
+      </if>
+      <if test="publishStatus != null and publishStatus > 0" >
+        and publish_status = #{publishStatus,jdbcType=TINYINT}
+      </if>
+      order by create_time desc
+    </where>
+  </select>
+
+
+    <delete id="batchDelNotice" parameterType="java.util.List">
+        delete from notice where notice_id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

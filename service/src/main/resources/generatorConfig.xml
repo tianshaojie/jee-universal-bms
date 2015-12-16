@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+	<!-- 在pom.xml中使用了maven插件，可以直接cd到工程目录下执行"mvn mybatis-generator:generate"命令生成MyBatis文件 -->
+	<classPathEntry location="/Users/tiansj/.m2/repository/mysql/mysql-connector-java/5.1.22/mysql-connector-java-5.1.22.jar"/>
+  	<context id="context1" targetRuntime="MyBatis3">
+		<commentGenerator>
+			<property name="suppressAllComments" value="true" />
+			<property name="suppressDate" value="true" />
+		</commentGenerator>
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://127.0.0.1:3306/back_universal?characterEncoding=UTF-8"
+			userId="root" password="mrule">
+		</jdbcConnection>
+
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+		
+	    <javaModelGenerator targetPackage="com.yuzhi.back.dao.entity"
+	    	targetProject="/Users/tiansj/workspace/jee-universal-bms/src/main/java" >
+	    </javaModelGenerator>
+		<sqlMapGenerator targetPackage="com.yuzhi.back.dao.mapper"
+			targetProject="/Users/tiansj/workspace/jee-universal-bms/src/main/resources">
+		</sqlMapGenerator>
+		<javaClientGenerator targetPackage="com.yuzhi.back.dao.mapper"
+			targetProject="/Users/tiansj/workspace/jee-universal-bms/src/main/java" type="MIXEDMAPPER">
+		</javaClientGenerator>
+
+        <!--
+		<table tableName="sys_user" domainObjectName="User"
+			   enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		<table tableName="sys_role" domainObjectName="Role"
+			   enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+        <table tableName="sys_resource" domainObjectName="Resource"
+               enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+        </table>
+        -->
+
+		<table tableName="sys_user_role" domainObjectName="UserRole"
+			   enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+		<table tableName="sys_role_resource" domainObjectName="RoleResource"
+			   enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+		</table>
+
+
+	</context>
+</generatorConfiguration>

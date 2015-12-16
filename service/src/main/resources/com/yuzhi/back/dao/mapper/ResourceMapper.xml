@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yuzhi.back.dao.mapper.ResourceMapper" >
+  <resultMap id="BaseResultMap" type="com.yuzhi.back.dao.entity.Resource" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="pid" property="pid" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="icon" property="icon" jdbcType="VARCHAR" />
+    <result column="status" property="status" jdbcType="TINYINT" />
+    <result column="sort" property="sort" jdbcType="BIGINT" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, pid, name, url, icon, status, sort, create_time, update_time
+  </sql>
+  <insert id="insertSelective" useGeneratedKeys="true" keyProperty="id" parameterType="com.yuzhi.back.dao.entity.Resource" >
+    insert into sys_resource
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="pid != null" >
+        pid,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="icon != null" >
+        icon,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="sort != null" >
+        sort,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="pid != null" >
+        #{pid,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="sort != null" >
+        #{sort,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yuzhi.back.dao.entity.Resource" >
+    update sys_resource
+    <set >
+      <if test="pid != null" >
+        pid = #{pid,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null" >
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="sort != null" >
+        sort = #{sort,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+    <!--
+    <update id="batchUpdateSort"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update sys_resource
+            <set>
+                sort=${item.sort}
+            </set>
+            where id = ${item.id}
+        </foreach>
+
+    </update>
+    -->
+
+    <update id="batchUpdateSort" parameterType="java.util.List">
+        update sys_resource
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="sort=case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.sort != null">
+                        when id=#{i.id} then #{i.sort}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="pid=case" suffix="end,">
+                <foreach collection="list" item="i" index="index">
+                    <if test="i.pid != null">
+                        when id=#{i.id} then #{i.pid}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+</mapper>

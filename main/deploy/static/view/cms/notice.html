@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>bms</title>
+    <link rel="stylesheet" type="text/css" href="/themes/default/easyui.css" id="swicth-style">
+    <link rel="stylesheet" type="text/css" href="/css/icon.css">
+    <link rel="stylesheet" type="text/css" href="/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/themes/color.css">
+    <link rel="stylesheet" type="text/css" href="/umeditor/themes/default/css/umeditor.css">
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/js/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="/js/common.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/umeditor/umeditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/umeditor/umeditor.min.js"></script>
+    <script type="text/javascript" src="/umeditor/lang/zh-cn/zh-cn.js"></script>
+</head>
+
+<body class="easyui-layout" style="padding:5px">
+
+<fieldset>
+    <legend>信息查询</legend>
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="0">
+                <tr>
+                    <th>标题：</th>
+                    <td style="width:120px">
+                        <input name="title" class="easyui-textbox" type="text" style="width:100px">
+                    </td>
+                    <th>类别：</th>
+                    <td style="width:120px">
+                        <select id="statusSelect" name="category" class="easyui-combobox" data-options="onSelect: function(rec){onSearch()}" style="width:100px">
+                            <option value="0">全部</option>
+                            <option value="1">网站公告</option>
+                            <option value="2">媒体公告</option>
+                        </select>
+                    </td>
+                    <td colspan="2">
+                        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="onSearch()">查询</a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="onClear()">重置</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+
+<table id="dg"> </table>
+
+<div id="addOrEdit" class="easyui-window" title="添加用户" data-options="closed:true,iconCls:'icon-save',footer:'#ft'" style="width:800px;height:500px;padding:10px;">
+    <form id="ff" method="post">
+        <table class="table-blue">
+            <tr>
+                <th>类别：</th>
+                <td><select name="category" class="easyui-combobox" style="width:30%">
+                    <option value="1" selected>网站公告</option>
+                    <option value="2">媒体公告</option>
+                </select></td>
+            </tr>
+            <tr>
+                <th>标题：</th>
+                <td><input type="hidden" name="noticeId"/><input class="easyui-validatebox textbox" type="text" name="title" data-options="required:true, validType:'maxLength[50]'"/>
+                </td>
+            </tr>
+            <tr>
+                <th>来源：</th>
+                <td><input class="easyui-validatebox textbox" type="text" name="source" data-options="validType:'maxLength[100]'"/></td>
+            </tr>
+            <tr>
+                <th>使用外部链接：</th>
+                <td><input class="easyui-validatebox textbox" type="text" id="noticeLink" name="link" disabled="disabled" data-options="validType:'maxLength[200]'"/><input type="checkbox" id="isUseLink" autocomplete="off"></td>
+            </tr>
+            <tr>
+                <th>内容：</th>
+                <td><script type="text/plain" id="myEditor" style="width:630px;height:200px;"></script></td>
+            </tr>
+        </table>
+    </form>
+    <div id="ft" style="padding:5px;text-align: right;">
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="submitForm()" style="width:80px">Ok</a> &nbsp;&nbsp;
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeWindow()" style="width:80px">Cancel</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var um = UM.getEditor('myEditor');
+
+    $('#isUseLink').click(function() {
+        if($(this).is(':checked')) {
+            $('#noticeLink').removeAttr('disabled');
+            UM.getEditor('myEditor').setDisabled('fullscreen');
+        } else {
+            $('#noticeLink').attr('disabled', 'disabled');
+            UM.getEditor('myEditor').setEnabled();
+        }
+    });
+
+    $(function(){
+        var dg = $('#dg').datagrid();
+        dg.datagrid({
+            url:'/v1/api0/notice/list',
+            columns:[[
+                {field:'ck',checkbox:true},
+                {field:'title',title:'标题',width:150},
+                {field:'category',title:'类别',width:100,formatter:function(value,row,index){
+                    switch(value) {
+                        case 1: return "网站公告";
+                        case 2: return "媒体公告";
+                    }
+                }},
+                {field:'publishStatus',title:'发布状态',width:100,formatter: function(value,row,index){
+                    switch(value) {
+                        case 1: return "未发布";
+                        case 2: return "已发布";
+                    }
+                }},
+                {field:'publishTime',title:'发布时间',width:100,formatter: formatDateTime},
+                {field:'createTime',title:'创建时间',width:100,formatter: formatDateTime},
+
+                {field:'action',title:'操作',width:100,formatter: function(value,row,index){
+                    if(row.publishStatus == 1){
+                        return '<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="publish(1,\''+row.noticeId+'\')">发布</a>';
+                    }else{
+                        return '<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="publish(2,\''+row.noticeId+'\')">取消发布</a>';
+                    }
+                }}
+            ]],
+            title:'公告管理',
+            pagination: true,
+            iconCls: 'icon-application_view_detail',
+            singleSelect: false,
+            toolbar: [{
+                id: 'btnAdd',
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    add();
+                }
+            }, '-', {
+                id: 'btnEdit',
+                text: '修改',
+                iconCls: 'icon-edit',
+                handler: function () {
+                    edit();
+                }
+            }, '-', {
+                id: 'btnDelete',
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: function () {
+                    del();
+                }
+            }, '-', {
+                id: 'btnReload',
+                text: '刷新',
+                iconCls: 'icon-reload',
+                handler: function () {
+                    $("#dg").datagrid("reload");
+                }
+            }]
+        });
+
+        var heightMargin = $("#searchBar").height() + 45;
+        $('#dg').resizeDataGrid(heightMargin, 0, 0, 0);
+        $(window).resize(function() {
+            $('#dg').resizeDataGrid(heightMargin, 0, 0, 0);
+        });
+    });
+
+    function onSearch(){
+        var queryParams = $('#ffSearch').serializeObject();
+        $('#dg').datagrid({
+            url:'/v1/api0/notice/list',
+            queryParams: queryParams
+        });
+    }
+
+    function onClear() {
+        $('#ffSearch').form('clear');
+        $('#statusSelect').combobox('setValue', '0');
+        onSearch();
+    }
+
+    function add() {
+        $('#ff').form('clear');
+        $("#ff input[name='noticeId']").val("");
+        $('#addOrEdit').window({title:'添加公告'});
+        $('#addOrEdit').window('open');
+    }
+
+    function edit() {
+        $('#ff').form('clear');
+        var row = $('#dg').datagrid('getSelected');
+        if (!row){
+            top.window.showMessage("请选择公告");
+            return;
+        }
+        $('#ff').form('load',row);
+        $("#ff input[name='noticeId']").val(row.noticeId);
+        $('body').data('ff-serialize', $('#ff').serialize());
+        $('#addOrEdit').window({title:'编辑公告'});
+        $('#addOrEdit').window('open');
+    }
+
+    function submitForm(){
+        var id = $("#ff input[name='noticeId']").val();
+        var url = id.length ? "/v1/api0/notice/edit" : "/v1/api0/notice/add";
+        var data = $('#ff').serialize();
+        if(data == $('body').data('ff-serialize')) {
+            top.window.showMessage("数据没有改动");
+            return;
+        }
+        $.ajax({
+            type: "post",
+            url: url,
+            data: data,
+            datatype: "json",
+            beforeSend: function () {
+                if (!$('#ff').form('validate')){
+                    return false;
+                }
+                $('#dg').datagrid('loading');
+            },
+            success: function (data) {
+                if(data.code == 200) {
+                    $('#dg').datagrid('reload');
+                    top.window.showMessage();
+                    closeWindow();
+                } else {
+                    top.window.showMessage(data.msg);
+                    $('#dg').datagrid('loaded');
+                }
+            },
+            error: function () {
+                $('#dg').datagrid('loaded');
+            }
+        });
+    }
+
+    function closeWindow(){
+        $('#addOrEdit').window('close');
+    }
+
+    function del() {
+        var ids = [];
+        var rows = $('#dg').datagrid('getSelections');
+        if(!rows.length) {
+            top.window.showMessage("请选择公告");
+            return;
+        }
+        for (var i = 0; i < rows.length; i++) {
+            ids.push(rows[i].noticeId);
+        }
+
+        top.window.$.messager.confirm('确认', '您确定要删除选择的公告吗？', function(r){
+            if (r){
+                var url = "/v1/api0/notice/delete";
+                var data = {ids: ids.join(',')};
+                $.ajax(ajaxOption(url, data));
+            }
+        });
+    }
+
+
+    function ajaxOption(url, data) {
+        return {
+            type: "post",
+            url: url,
+            data: data,
+            datatype: "json",
+            beforeSend: function () {
+                $('#dg').datagrid('loading');
+            },
+            success: function (data) {
+                if(data.code == 200) {
+                    $('#dg').datagrid('reload');
+                    top.window.showMessage();
+                    closeWindow();
+                } else {
+                    top.window.showMessage(data.msg);
+                    $('#dg').datagrid('loaded');
+                }
+            },
+            error: function () {
+                $('#dg').datagrid('loaded');
+            }
+        }
+    }
+
+    function publish(status,noticeId){
+        if(status == 1){
+            $.post("/v1/api0/notice/publish",{id:noticeId},
+                    function(data){
+                        if(data.code == 200){
+                            top.window.showMessage("操作成功");
+                            $('#dg').datagrid('reload');
+                        }else{
+                            top.window.showMessage(data.msg);
+                        }
+                    });
+        }else{
+            $.post("/v1/api0/notice/cancelPublish",{id:noticeId},
+                    function(data){
+                        if(data.code == 200){
+                            top.window.showMessage("操作成功");
+                            $('#dg').datagrid('reload');
+                        }else{
+                            top.window.showMessage(data.msg);
+                        }
+                    });
+        }
+    }
+
+</script>
+</body>
+</html>

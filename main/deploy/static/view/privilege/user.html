@@ -1,0 +1,384 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>bms</title>
+<link rel="stylesheet" type="text/css" href="/themes/default/easyui.css" id="swicth-style">
+<link rel="stylesheet" type="text/css" href="/css/icon.css">
+<link rel="stylesheet" type="text/css" href="/css/common.css">
+<link rel="stylesheet" type="text/css" href="/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="/themes/color.css">
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="/js/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+</head>
+
+<body class="easyui-layout" style="padding:5px">
+<fieldset>
+    <legend>信息查询</legend>
+    <form id="ffSearch" method="post">
+        <div id="searchBar">
+            <table cellspacing="0" cellpadding="0">
+                <tr>
+                    <th>用户ID：</th>
+                    <td style="width:120px">
+                        <input name="id" class="easyui-textbox" type="text" style="width:100px">
+                    </td>
+                    <th>用户名：</th>
+                    <td style="width:120px">
+                        <input name="username" class="easyui-textbox" type="text" style="width:100px">
+                    </td>
+                    <th>用户姓名：</th>
+                    <td style="width:120px">
+                        <input name="realName" class="easyui-textbox" type="text" style="width:100px">
+                    </td>
+                    <th>用户状态：</th>
+                    <td style="width:120px">
+                        <select id="statusSelect" name="status" class="easyui-combobox" data-options="onSelect: function(rec){onSearch()}" style="width:100px">
+                            <option value="0">全部</option>
+                            <option value="1">启用</option>
+                            <option value="2">禁用</option>
+                        </select>
+                    </td>
+                    <td colspan="2">
+                        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="onSearch()">查询</a>&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="onClear()">重置</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</fieldset>
+
+<table id="dg"> </table>
+
+<div id="addOrEdit" class="easyui-window" title="添加用户" data-options="closed:true,iconCls:'icon-save',footer:'#ft'" style="width:450px;height:300px;padding:10px;">
+    <form id="ff" method="post">
+        <table class="table-blue">
+            <tr>
+                <th>用户名：</th>
+                <td><input type="hidden" name="id"/><input class="easyui-validatebox textbox" type="text" name="username" data-options="required:true, validType:'maxLength[15]'"/>
+                </td>
+            </tr>
+            <tr>
+                <th>密码：</th>
+                <td><input class="easyui-validatebox textbox" type="text" id="password" name="password" data-options="required:true, validType:'length[6,64]'"/></td>
+            </tr>
+            <tr>
+                <th>姓名：</th>
+                <td><input class="easyui-validatebox textbox" type="text" name="realName" data-options="required:true, validType:'maxLength[15]'"/></td>
+            </tr>
+            <tr>
+                <th>邮箱：</th>
+                <td><input class="easyui-validatebox textbox" type="text" name="email" data-options="prompt:'Enter a valid email.',validType:['email','maxLength[45]']"/></td>
+            </tr>
+            <tr>
+                <th>备注：</th>
+                <td><input class="easyui-validatebox textbox" name="remark" data-options="multiline:true, validType:'maxLength[60]'" style="height:60px;"/></td>
+            </tr>
+        </table>
+    </form>
+    <div id="ft" style="padding:5px;text-align: right;">
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="submitForm()" style="width:80px">Ok</a> &nbsp;&nbsp;
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeWindow()" style="width:80px">Cancel</a>
+    </div>
+</div>
+
+<div id="bind" class="easyui-window" title="绑定角色" data-options="closed:true,iconCls:'icon-save',footer:'#ft1'" style="width:300px;height:500px;padding:10px;">
+    <div id="dl"></div>
+    <div id="ft1" style="padding:5px;text-align: right;">
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-ok'" href="javascript:void(0)" onclick="bindRole()" style="width:80px">Ok</a> &nbsp;&nbsp;
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0)" onclick="closeWindow()" style="width:80px">Cancel</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function(){
+        var dg = $('#dg').datagrid();
+        dg.datagrid({
+            url:'/v1/api0/user/list',
+            columns:[[
+                {field:'ck',checkbox:true},
+                {field:'id',title:'用户ID',width:60},
+                {field:'username',title:'用户名',width:100},
+                {field:'realName',title:'姓名',width:100},
+                {field:'email',title:'邮箱',width:100},
+                {field:'createTime',title:'创建时间',width:100,formatter: formatDateTime},
+                {field:'status',title:'状态',width:60,formatter: function(value,row,index){
+                    switch(value) {
+                        case 1: return "启用";
+                        case 2: return "禁用";
+                    }
+                }},
+                {field:'action',title:'操作',width:120,formatter: function(value,row,index){
+                    if(row.status == 1){
+                        return '<a href="javascript:void(0)" class="easyui-linkbutton" onclick="showBindWindow(\''+row.id+'\')">角色授权</a> | ' +
+                                '<a href="javascript:void(0)" class="easyui-linkbutton" onclick="disable(\''+row.id+'\')">禁用</a> | ' +
+                                '<a href="javascript:void(0)" class="easyui-linkbutton" onclick="resetPassword(\''+row.id+'\')">重置密码</a>';
+                    }else{
+                        return '<a href="javascript:void(0)" class="easyui-linkbutton" onclick="showBindWindow(\''+row.id+'\')">角色授权</a> | ' +
+                                '<a href="javascript:void(0)" class="easyui-linkbutton" onclick="enable(\''+row.id+'\')">启用</a> | ' +
+                                '<a href="javascript:void(0)" class="easyui-linkbutton" onclick="resetPassword(\''+row.id+'\')">重置密码</a>';
+                    }
+                }}
+            ]],
+            title:'用户管理',
+            pagination: true,
+            iconCls: 'icon-application_view_detail',
+            singleSelect: false,
+            toolbar: [{
+                id: 'btnAdd',
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: function () {
+                    add();
+                }
+            }, '-', {
+                id: 'btnEdit',
+                text: '修改',
+                iconCls: 'icon-edit',
+                handler: function () {
+                    edit();
+                }
+            }, '-', {
+                id: 'btnDelete',
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: function () {
+                    del();
+                }
+            }, '-', {
+                id: 'btnReload',
+                text: '刷新',
+                iconCls: 'icon-reload',
+                handler: function () {
+                    $("#dg").datagrid("reload");
+                }
+            }]
+        });
+
+        var heightMargin = $("#searchBar").height() + 45;
+        $('#dg').resizeDataGrid(heightMargin, 0, 0, 0);
+        $(window).resize(function() {
+            $('#dg').resizeDataGrid(heightMargin, 0, 0, 0);
+        });
+    });
+
+    function onSearch(){
+        var queryParams = $('#ffSearch').serializeObject();
+        $('#dg').datagrid({
+            url:'/v1/api0/user/list',
+            queryParams: queryParams
+        });
+    }
+
+    function onClear() {
+        $('#ffSearch').form('clear');
+        $('#statusSelect').combobox('setValue', '0');
+        onSearch();
+    }
+
+    function add() {
+        $('#ff').form('clear');
+        $("#ff input[name='id']").val("");
+        $("#password").removeAttr('disabled');
+        $('#addOrEdit').window({title:'添加用户'});
+        $('#addOrEdit').window('open');
+    }
+
+    function edit() {
+        $('#ff').form('clear');
+        var row = $('#dg').datagrid('getSelected');
+        if (!row){
+            top.window.showMessage("请选择用户");
+            return;
+        }
+        $('#ff').form('load',row);
+        $("#ff input[name='id']").val(row.id);
+        $("#password").attr('disabled', 'disabled');
+        $('body').data('ff-serialize', $('#ff').serialize());
+        $('#addOrEdit').window({title:'编辑用户'});
+        $('#addOrEdit').window('open');
+    }
+
+    function submitForm(){
+        var id = $("#ff input[name='id']").val();
+        var url = id.length ? "/v1/api0/user/edit" : "/v1/api0/user/add";
+        var data = $('#ff').serialize();
+        if(data == $('body').data('ff-serialize')) {
+            top.window.showMessage("数据没有改动");
+            return;
+        }
+        $.ajax({
+            type: "post",
+            url: url,
+            data: data,
+            datatype: "json",
+            beforeSend: function () {
+                if (!$('#ff').form('validate')){
+                    return false;
+                }
+                $('#dg').datagrid('loading');
+            },
+            success: function (data) {
+                if(data.code == 200) {
+                    $('#dg').datagrid('reload');
+                    top.window.showMessage();
+                    closeWindow();
+                } else {
+                    top.window.showMessage(data.msg);
+                    $('#dg').datagrid('loaded');
+                }
+            },
+            error: function () {
+                $('#dg').datagrid('loaded');
+            }
+        });
+    }
+
+    function closeWindow(){
+        $('#addOrEdit').window('close');
+        $('#bind').window('close');
+    }
+
+    function del() {
+        var ids = [];
+        var rows = $('#dg').datagrid('getSelections');
+        if(!rows.length) {
+            top.window.showMessage("请选择用户");
+            return;
+        }
+        for (var i = 0; i < rows.length; i++) {
+            ids.push(rows[i].id);
+        }
+
+        top.window.$.messager.confirm('确认', '您确定要删除选择的用户吗？', function(r){
+            if (r){
+                var url = "/v1/api0/user/delete";
+                var data = {ids: ids.join(',')};
+                $.ajax(ajaxOption(url, data));
+            }
+        });
+    }
+
+    function disable(id) {
+        var url = "/v1/api0/user/disable";
+        var data = {id: id};
+        $.ajax(ajaxOption(url, data));
+    }
+
+    function enable(id) {
+        var url = "/v1/api0/user/enable";
+        var data = {id: id};
+        $.ajax(ajaxOption(url, data));
+    }
+
+    function resetPassword(id) {
+        top.window.$.messager.confirm('确认', '您确定要重置该用户密码吗？', function(r){
+            if (r){
+                var url = "/v1/api0/user/password/reset";
+                var data = {id: id};
+                $.ajax(ajaxOption(url, data));
+            }
+        });
+    }
+
+    function showBindWindow(id) {
+        $('body').data('userId', id);
+        $('#dl').datalist({
+            url: '/v1/api0/role/list',
+            valueField: 'id',
+            textField: 'name',
+            checkbox: true,
+            singleSelect: false,
+            rownumbers: false,
+            onLoadSuccess:function(row) {
+                var rowData = row.rows;
+                $.ajax({
+                    type: "post",
+                    url: '/v1/api0/user/roles',
+                    data: {userId:id},
+                    datatype: "json",
+                    success: function (data) {
+                        if(data.code != 200) {
+                            return;
+                        }
+                        var roles = data.body;
+                        $.each(rowData, function(idx,val){//遍历JSON
+                            $.each(roles, function(i, role) {
+                                if(val.id == role.id){
+                                    $("#dl").datalist("selectRow", idx);//如果数据行为已选中则选中改行
+                                    return;
+                                }
+                            });
+                        });
+                    }
+                })
+            }
+        });
+        $('#bind').window('open');
+    }
+
+    function bindRole() {
+        var userId = $('body').data('userId');
+
+
+        var roleIds = [];
+        var rows = $('#dl').datagrid('getSelections');
+        if(!rows.length) {
+            top.window.showMessage("请选择要绑定的角色");
+            return;
+        }
+        for (var i = 0; i < rows.length; i++) {
+            roleIds.push(rows[i].id);
+        }
+
+        var url = "/v1/api0/user/bindRole";
+        var data = {userId:userId, roleIds: roleIds.join(',')};
+        $.ajax(ajaxOption(url, data));
+    }
+
+    function batchBindRole() {
+        var roleIds = [];
+        var nodes = $('#tt').tree('getChecked', ['checked','indeterminate']);
+        if(!nodes.length) {
+            top.window.showMessage("请选择要绑定的角色");
+            return;
+        }
+        for(var i=0; i<nodes.length; i++){
+            roleIds.push(nodes[i].id);
+        }
+        var url = "/v1/api0/user/batchBindRole";
+         var data = {userIds: userIds.join(','), roleIds: roleIds.join(',')};
+         $.ajax(ajaxOption(url, data));
+    }
+
+    function ajaxOption(url, data) {
+        return {
+            type: "post",
+            url: url,
+            data: data,
+            datatype: "json",
+            beforeSend: function () {
+                $('#dg').datagrid('loading');
+            },
+            success: function (data) {
+                if(data.code == 200) {
+                    $('#dg').datagrid('reload');
+                    top.window.showMessage();
+                    closeWindow();
+                } else {
+                    top.window.showMessage(data.msg);
+                    $('#dg').datagrid('loaded');
+                }
+            },
+            error: function () {
+                $('#dg').datagrid('loaded');
+            }
+        }
+    }
+</script>
+</body>
+</html>

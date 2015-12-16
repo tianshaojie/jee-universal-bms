@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.yuzhi.back</groupId>
+        <artifactId>back-project</artifactId>
+        <version>${webapp-back-version}</version>
+    </parent>
+    <artifactId>back-web</artifactId>
+    <name>back :: project :: web</name>
+
+    <properties>
+        <webapp-back-version>version</webapp-back-version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.yuzhi.back</groupId>
+            <artifactId>back-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <!-- here the phase you need -->
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../main/deploy/config</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                                <resource>
+                                    <directory>../main/deploy</directory>
+                                    <excludes>
+                                        <exclude>config/*</exclude>
+                                        <exclude>bin/*</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+        </plugins>  
+    </build>
+
+</project>

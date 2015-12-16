@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>bms</title>
+<link rel="stylesheet" type="text/css" href="../themes/default/easyui.css" id="swicth-style">
+<link rel="stylesheet" type="text/css" href="../css/home.css">
+<link rel="stylesheet" type="text/css" href="../css/icon.css">
+<link rel="stylesheet" type="text/css" href="../themes/icon.css">
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="../js/easyui-lang-zh_CN.js"></script>
+</head>
+
+<body class="easyui-layout">
+
+<div id="tb" style="padding:5px;height:auto">
+    <fieldset>
+        <legend>信息查询</legend>
+        <form id="ffSearch" method="post">
+            <div id="searchBar">
+                <table cellspacing="0" cellpadding="0">
+                    <tr>
+                        <th>
+                            <label for="userId">用户ID：</label>
+                        </th>
+                        <td style="width:120px">
+                            <input id="userId" class="easyui-textbox" style="width:100px">
+                        </td>
+                        <th>
+                            <label for="userNameSearch">用户姓名：</label>
+                        </th>
+                        <td style="width:120px">
+                            <input id="userNameSearch" class="easyui-textbox" style="width:100px">
+                        </td>
+                        <th>
+                            <label for="statusSearch">用户状态：</label>
+                        </th>
+                        <td style="width:120px">
+                            <select id="statusSearch" class="easyui-combobox" panelHeight="auto" style="width:100px">
+                                <option value="0">全部</option>
+                                <option value="1">正常</option>
+                                <option value="2">禁用</option>
+                            </select>
+                        </td>
+                        <td colspan="2">
+                            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'" id="btnSearch">查询</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </fieldset>
+
+	<table id="dg"> </table>
+</div>
+
+	<script type="text/javascript">
+        /**
+         * JQuery扩展方法，用户对JQuery EasyUI的DataGrid控件进行操作。
+         */
+        $.fn.extend({
+            /**
+             * 修改DataGrid对象的默认大小，以适应页面宽度。
+             * @param heightMargin 高度对页内边距的距离。
+             * @param widthMargin 宽度对页内边距的距离。
+             * @param minHeight 最小高度。
+             * @param minWidth 最小宽度。
+             */
+            resizeDataGrid : function(heightMargin, widthMargin, minHeight, minWidth) {
+                var height = $(document.body).height() - heightMargin;
+                var width = $(document.body).width() - widthMargin;
+                height = height < minHeight ? minHeight : height;
+                width = width < minWidth ? minWidth : width;
+                $(this).datagrid('resize', {
+                    height : height,
+                    width : width
+                });
+            }
+        });
+
+        $(function()p
+            var dg = $('#dg').datagrid();
+            dg.datagrid({
+                url:'datagrid-user.json',
+                columns:[[
+                    {field:'ck',checkbox:true },
+                    {field:'id',title:'用户ID',width:100},
+                    {field:'username',title:'用户名',width:100},
+                    {field:'createTime',title:'创建时间',width:100},
+                    {field:'status',title:'状态',width:100,formatter: function(value,row,index){
+                        switch(value) {
+                            case 1: return "正常";
+                            case 2: return "禁用";
+                        }
+                    }},
+                    {field:'action',title:'操作',width:100,formatter: function(value,row,index){
+                        if(row.status == 1){
+                            return  '<a href="javascript:void(0)" class="easyui-linkbutton">编辑</a> | ' +
+                                    '<a href="javascript:void(0)" class="easyui-linkbutton">删除</a> | ' +
+                                    '<a href="javascript:void(0)" class="easyui-linkbutton">禁用</a>';
+                        }else{
+                            return  '<a href="javascript:void(0)" class="easyui-linkbutton">编辑</a> | ' +
+                                    '<a href="javascript:void(0)" class="easyui-linkbutton">删除</a> | ' +
+                                    '<a href="javascript:void(0)" class="easyui-linkbutton">解禁</a>';
+                        }
+                    }}
+                ]],
+                title:'用户管理',
+                rownumbers: true,
+                pagination: true,
+                fitColumns:true,
+                iconCls: 'icon-application_view_detail',
+                singleSelect: false,
+                selectOnCheck: true,
+                checkOnSelect: true,
+                toolbar: [{
+                    id: 'btnAdd',
+                    text: '添加',
+                    iconCls: 'icon-add',
+                    handler: function () {
+                        ShowAddDialog();//实现添加记录的页面
+                    }
+                }, '-', {
+                    id: 'btnEdit',
+                    text: '修改',
+                    iconCls: 'icon-edit',
+                    handler: function () {
+                        ShowEditOrViewDialog();//实现修改记录的方法
+                    }
+                }, '-', {
+                    id: 'btnDelete',
+                    text: '删除',
+                    iconCls: 'icon-remove',
+                    handler: function () {
+                        Delete();//实现直接删除数据的方法
+                    }
+                }, '-', {
+                    id: 'btnReload',
+                    text: '刷新',
+                    iconCls: 'icon-reload',
+                    handler: function () {
+                        $("#dg").datagrid("reload");//实现刷新栏目中的数据
+                    }
+                }]
+            });
+
+            var pager = dg.datagrid('getPager');
+            pager.pagination({
+                layout:['list','sep','first','prev','sep','links','sep','next','last','sep','refresh']
+            });
+
+            // 第一次加载时自动变化大小
+            var heightMargin = $("#searchBar").height() + 45;
+            $('#dg').resizeDataGrid(heightMargin, 10, 0, 0);
+            // 当窗口大小发生变化时，调整DataGrid的大小
+            $(window).resize(function() {
+                $('#dg').resizeDataGrid(heightMargin, 10, 0, 0);
+            });
+        });
+	</script>
+</body>
+</html>
