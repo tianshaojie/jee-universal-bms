@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.yuzhi.back</groupId>
         <artifactId>back-project</artifactId>
-        <version>${webapp-back-version}</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>back-web</artifactId>
     <name>back :: project :: web</name>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.yuzhi.back</groupId>
             <artifactId>back-service</artifactId>
-            <version>${project.version}</version>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
     

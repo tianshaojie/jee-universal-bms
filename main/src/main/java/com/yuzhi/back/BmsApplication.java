@@ -16,7 +16,7 @@ import java.util.List;
 @Configuration
 @ComponentScan
 @EnableAutoConfiguration
-public class Application {
+public class BmsApplication {
     public static ConfigurableApplicationContext run(Object source, String[] args) {
         return run(new Object[] { source }, args);
     }
@@ -28,6 +28,6 @@ public class Application {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        run(Application.class, args);
+        run(BmsApplication.class, args);
     }
 }

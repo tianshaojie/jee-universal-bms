@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.yuzhi.back</groupId>
     <artifactId>back-project</artifactId>
-    <version>${webapp-back-version}</version>
+    <version>1.0.0</version>
     <name>back :: project</name>
     <packaging>pom</packaging>
 
@@ -97,7 +97,31 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>internal</id>
+            <url>http://192.168.1.24:8080/nexus/content/groups/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>InternalSnapshots</id>
+            <name>Internal Snapshots</name>
+            <url>http://192.168.1.24:8080/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>InternalReleases</id>
+            <name>Internal Releases</name>
+            <url>http://192.168.1.24:8080/nexus/content/repositories/releases/</url>
+        </repository>
+    </distributionManagement>
+
     <pluginRepositories>
         <pluginRepository>
             <id>public</id>
