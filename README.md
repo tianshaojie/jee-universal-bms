@@ -1,5 +1,6 @@
 # jee-universal-bms
  * J2EE通用后台管理系统
+ * 后台地址: http://localhost:8080/ (用户名密码：superadmin/111111)
 
 ## 功能清单
 
@@ -53,7 +54,7 @@
 1. 配置数据库，初始化service/resources/sql/application.sql
 2. 本地启动redis
 3. 修改main/deploy/application.yml
-4. 把main/deplay，main/deploy/config加到工程的dependendies
+4. 把main/deploy，main/deploy/config加到工程的dependencies
 5. run main BmsApplication.java main方法即可启动
 
 
